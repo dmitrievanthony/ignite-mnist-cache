@@ -53,48 +53,48 @@ public class Application {
                 return Ignition.start(cfg);
             }
         }
+    }
 
-        private void fillCache(IgniteCache<Integer, LabeledImage> cache) throws IOException {
-            DataInputStream images = new DataInputStream(Application.class.getClassLoader()
-                .getResourceAsStream("test/train-images-idx3-ubyte"));
-            DataInputStream labels = new DataInputStream(Application.class.getClassLoader()
-                .getResourceAsStream("test/train-labels-idx1-ubyte"));
+    private static void fillCache(IgniteCache<Integer, LabeledImage> cache) throws IOException {
+        DataInputStream images = new DataInputStream(Application.class.getClassLoader()
+            .getResourceAsStream("test/train-images-idx3-ubyte"));
+        DataInputStream labels = new DataInputStream(Application.class.getClassLoader()
+            .getResourceAsStream("test/train-labels-idx1-ubyte"));
 
-            images.readInt();
-            int imagesLen = images.readInt();
-            int imagesRows = images.readInt();
-            int imagesCols = images.readInt();
+        images.readInt();
+        int imagesLen = images.readInt();
+        int imagesRows = images.readInt();
+        int imagesCols = images.readInt();
 
-            labels.readInt();
-            int labelsLen = labels.readInt();
+        labels.readInt();
+        int labelsLen = labels.readInt();
 
-            if (imagesLen != labelsLen)
-                throw new IllegalStateException("Number of images and labels are not equal");
+        if (imagesLen != labelsLen)
+            throw new IllegalStateException("Number of images and labels are not equal");
 
-            for (int i = 0; i < imagesLen; i++) {
-                double[] pixels = new double[imagesRows * imagesCols];
-                for (int j = 0; j < imagesRows * imagesCols; j++) {
-                    byte px = images.readByte();
-                    pixels[j] = (px + 128) / 255;
-                }
-                int lb = labels.readByte();
-                cache.put(i, new LabeledImage(pixels, lb));
+        for (int i = 0; i < imagesLen; i++) {
+            byte[] pixels = new byte[imagesRows * imagesCols];
+            for (int j = 0; j < imagesRows * imagesCols; j++) {
+                byte px = images.readByte();
+                pixels[j] = px;
             }
+            byte lb = labels.readByte();
+            cache.put(i, new LabeledImage(pixels, lb));
         }
     }
 
     private static class LabeledImage {
 
-        private final double[] pixels;
+        private final byte[] pixels;
 
         private final int label;
 
-        public LabeledImage(double[] pixels, int label) {
+        public LabeledImage(byte[] pixels, byte label) {
             this.pixels = pixels;
             this.label = label;
         }
 
-        public double[] getPixels() {
+        public byte[] getPixels() {
             return pixels;
         }
 
@@ -102,4 +102,5 @@ public class Application {
             return label;
         }
     }
+
 }
